@@ -1,0 +1,50 @@
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.XR.ARFoundation;
+
+public class ArrowController : MonoBehaviour
+{
+    public Transform target; // Reference to the target object
+    private ARRaycastManager raycastManager;
+    private List<ARRaycastHit> hits = new List<ARRaycastHit>();
+
+    void Start()
+    {
+        raycastManager = FindObjectOfType<ARRaycastManager>();
+
+        if (raycastManager == null)
+        {
+            Debug.LogError("ARRaycastManager not found in the scene.");
+        }
+
+        // Find the target object by its tag (or any other means)
+        target = GameObject.FindGameObjectWithTag("Target").transform;
+
+        if (target == null)
+        {
+            Debug.LogError("Target object not found. Make sure to set the correct tag.");
+        }
+    }
+
+    void Update()
+    {
+        if (target != null && raycastManager != null)
+        {
+            // Calculate direction to the target
+            Vector3 directionToTarget = target.position - transform.position;
+
+            // Flatten the direction vector in the x-z plane
+            directionToTarget.y = 0f;
+
+            // Set the rotation to point towards the target
+            if (directionToTarget != Vector3.zero)
+            {
+                transform.forward = directionToTarget.normalized;
+            }
+
+            // Optional: Scale the arrow based on distance (adjust as needed)
+            float scaleFactor = Mathf.Clamp(1.0f - directionToTarget.magnitude / 10.0f, 0.5f, 1.0f);
+            transform.localScale = new Vector3(scaleFactor, scaleFactor, scaleFactor);
+        }
+    }
+}
